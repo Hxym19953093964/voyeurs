@@ -1,20 +1,3 @@
-#!/usr/bin/env python3
-#
-#  ________                                 _      _____  _                     
-# /  ___ | |                               | |    |____ || |                    
-# `---. \| |__  _ __  ___  __ _  _ __    __| | _ __    / /| |__    __ _  _ __  
-#     \ \|  _ \|  __|/ _ \/ _  ||  _ \  / _  ||  _ \   \ \|  _ \  / _  ||  _ \ 
-#/\__/ /| | | | |  |  __/ (_| || | | || (_| || |_) |.__/ /| | | || (_| || | | |
-#\____/ |_| |_|_|   \___|\__,_||_| |_| \__,_||  __/ \____/ |_| |_| \__,_||_| |_|
-#                                            | |                              
-#                                            |_|                              
-#
-# CreeperVision - Camera Trap Phishing Tool
-# A stealthy surveillance tool that captures images from target devices
-#
-# WARNING: This tool is for educational purposes only.
-# Please use responsibly and only on systems you own or have explicit permission to test.
-# 请勿用于非法用途！
 
 import argparse
 import os
@@ -76,6 +59,9 @@ if __name__ == '__main__':
     server_thread = threading.Thread(target=run_server, args=(port,))
     server_thread.daemon = True
     server_thread.start()
+    
+    # Print the server URL
+    print(f"Server running on http://localhost:{port}")
     
     # Keep the main thread alive
     try:
