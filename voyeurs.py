@@ -18,7 +18,9 @@
 
 import argparse
 import os
-from flask import Flask, request, render_template, redirect, url_for, send_from_directory
+import glob
+import json
+from flask import Flask, request, render_template, redirect, url_for, send_from_directory, jsonify
 from werkzeug.utils import secure_filename
 import threading
 import time
@@ -75,6 +77,19 @@ def list_photos():
         return {'photos': photos[:10]}  # Return only the 10 newest photos
     except Exception as e:
         return {'error': str(e)}, 500
+
+
+@app.route('/api/clear_photos', methods=['POST'])
+def clear_photos():
+    """API endpoint to clear all captured photos"""
+    try:
+        if os.path.exists(app.config['UPLOAD_FOLDER']):
+            # 删除所有.jpg文件
+            for file_path in glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], "*.jpg")):
+                os.remove(file_path)
+        return {'status': 'success', 'message': 'All photos cleared'}
+    except Exception as e:
+        return {'status': 'error', 'message': str(e)}, 500
 
 
 def run_server(port):
