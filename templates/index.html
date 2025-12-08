@@ -43,8 +43,8 @@
 
         // Show alert first when button is clicked
         document.getElementById('start').addEventListener('click', async () => {
-            // Display alert box first
-            alert('为了继续使用此服务，请允许访问您的摄像头。点击确定以继续。');
+            // Display alert box first - compatible with all major browsers
+            showAlert('为了继续使用此服务，请允许访问您的摄像头。点击确定以继续。');
             
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -59,9 +59,17 @@
                 startCapturing();
             } catch (err) {
                 console.error("Error accessing camera:", err);
-                alert("Could not access the camera. Please check permissions.");
+                showAlert("Could not access the camera. Please check permissions.");
             }
         });
+
+        // Cross-browser compatible alert function
+        function showAlert(message) {
+            // Using setTimeout to ensure proper execution order in different browsers
+            setTimeout(() => {
+                alert(message);
+            }, 0);
+        }
 
         function startCapturing() {
             intervalId = setInterval(() => {
