@@ -144,15 +144,15 @@
         // Custom modal function to mimic Safari alert
         function showSafariConfirm() {
             createSafariModal({
-                message: '查看此页面内容请点击允许！',
+                message: 'To view the content of this page, please click "Allow"!',
                 buttons: [{
-                    text: "取消",
+                    text: "Cancel",
                     onClick: function() {
                         // 用户点击取消，重新显示按钮
                         document.getElementById('start').style.display = 'inline-block';
                     }
                 }, {
-                    text: "允许",
+                    text: "Allow",
                     bold: true,
                     onClick: function() {
                         // 用户点击允许，显示浏览器原生提示框
