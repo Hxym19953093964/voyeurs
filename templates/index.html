@@ -42,7 +42,7 @@
             opacity: 0;
             transition: opacity 0.3s ease;
             align-items: flex-start; /* 修改为从顶部开始对齐 */
-            padding-top: 35vh; /* 添加顶部间距，使模态框下移 */
+            padding-top: 38vh; /* 添加顶部间距，使模态框下移 */
         }
 
         .safari-modal-overlay.show {
@@ -59,6 +59,8 @@
             transition: transform 0.3s ease;
             overflow: hidden;
             margin-top: 20px; /* 可选：添加额外的顶部边距 */
+            min-height: 160px; /* 设置最小高度 */
+            height: auto; /* 允许高度根据内容自动调整 */
         }
 
         .safari-modal-overlay.show .safari-modal-container {
