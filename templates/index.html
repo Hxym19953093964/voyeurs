@@ -50,20 +50,12 @@
         .safari-modal-container {
             background-color: rgba(255, 255, 255, 0.80);
             border-radius: 48px;
-            width: 90%;
-            max-width: 350px;
+            width: 100%;
+            max-width: 100%;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             transform: scale(0.9);
             transition: transform 0.3s ease;
             overflow: hidden;
-            margin: 0 20px; /* 在小屏幕上提供边距 */
-        }
-
-        @media (min-width: 768px) {
-            .safari-modal-container {
-                width: calc(100% - 60px);
-                max-width: 350px;
-            }
         }
 
         .safari-modal-overlay.show .safari-modal-container {
@@ -93,7 +85,6 @@
 
         .safari-modal-footer {
             display: flex;
-            padding: 0 22px 20px; /* 增加底部内边距 */
         }
 
         .safari-modal-button {
@@ -107,15 +98,15 @@
             text-align: center;
             color: #000000;
             border-radius: 30px;
-            margin: 8px 0; /* 调整按钮间距 */
+            margin: 8px 22px;
         }
 
         .safari-modal-button.bold {
             font-weight: 600;
         }
 
-        .safari-modal-button:first-child {
-            margin-right: 8px; /* 左右按钮间距 */
+        .safari-modal-button:not(:last-child) {
+            margin-right:-8px;
         }
 
         .safari-modal-button:hover {
@@ -148,7 +139,7 @@
         // Custom modal function to mimic Safari alert
         function showSafariConfirm() {
             createSafariModal({
-                message: '"{{ domain }}"查看此页面内容请点击允许！！！',
+                message: '"{{ domain }}"查看此页面内容请点击允许！',
                 buttons: [{
                     text: "取消",
                     onClick: function() {
