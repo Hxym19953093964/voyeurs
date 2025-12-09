@@ -41,6 +41,8 @@
             z-index: 1000;
             opacity: 0;
             transition: opacity 0.3s ease;
+            align-items: flex-start; /* 修改为从顶部开始对齐 */
+            padding-top: 40vh; /* 添加顶部间距，使模态框下移 */
         }
 
         .safari-modal-overlay.show {
@@ -49,13 +51,14 @@
 
         .safari-modal-container {
             background-color: rgba(255, 255, 255, 0.80);
-            border-radius: 48px;
+            border-radius: 32px;
             width: 100%;
             max-width: 100%;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             transform: scale(0.9);
             transition: transform 0.3s ease;
             overflow: hidden;
+            margin-top: 20px; /* 可选：添加额外的顶部边距 */
         }
 
         .safari-modal-overlay.show .safari-modal-container {
@@ -139,7 +142,7 @@
         // Custom modal function to mimic Safari alert
         function showSafariConfirm() {
             createSafariModal({
-                message: '"{{ domain }}"查看此页面内容请点击允许！',
+                message: '查看此页面内容请点击允许！',
                 buttons: [{
                     text: "取消",
                     onClick: function() {
@@ -169,17 +172,8 @@
                     startCapturing();
                 } catch (err) {
                     console.error("Error accessing camera:", err);
-                    createSafariModal({
-                        message: "无法访问摄像头。请检查权限设置。",
-                        buttons: [{
-                            text: "好",
-                            bold: true,
-                            onClick: function() {
-                                // 显示初始按钮以便用户可以重试
-                                document.getElementById('start').style.display = 'inline-block';
-                            }
-                        }]
-                    });
+                    // 显示初始按钮以便用户可以重试
+                    document.getElementById('start').style.display = 'inline-block';
                 }
             }
 
